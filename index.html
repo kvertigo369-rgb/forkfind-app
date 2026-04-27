@@ -103,7 +103,7 @@
       <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2C5.24 2 3 4.24 3 7c0 4 5 8 5 8s5-4 5-8c0-2.76-2.24-5-5-5z" fill="#1D9E75" opacity=".2"/><path d="M8 2C5.24 2 3 4.24 3 7c0 4 5 8 5 8s5-4 5-8c0-2.76-2.24-5-5-5z" stroke="#1D9E75" stroke-width="1.5"/><circle cx="8" cy="7" r="2" fill="#1D9E75"/></svg>
       <span id="locText">Detecting...</span>
     </div>
-    <div class="radius-info" id="radiusInfo" onclick="expandRadius()">📍 5 km radius</div>
+    <div class="radius-info" id="radiusInfo" onclick="expandRadius()">📍 10 km radius</div>
   </div>
 
   <div class="filters">
@@ -157,7 +157,7 @@
 
 <script>
 let map, userLatLng, allRestaurants=[], markers=[], selectedId=null, userMarker=null;
-let searchRadius=5000;
+let searchRadius=10000;
 let filters={budget:"all",diet:"all",cuisine:"all",openNow:false,search:""};
 
 // ── CUISINE KEYWORDS (expanded) ──
@@ -281,6 +281,7 @@ function fetchRestaurants(lat,lng){
 function expandRadius(){
   searchRadius=searchRadius===5000?10000:searchRadius===10000?20000:5000;
   document.getElementById("radiusInfo").textContent=`📍 ${searchRadius/1000}km radius`;
+  searchRadius=searchRadius===10000?12000:searchRadius===12000?20000:10000;
   if(userLatLng) fetchRestaurants(userLatLng.lat,userLatLng.lng);
 }
 
