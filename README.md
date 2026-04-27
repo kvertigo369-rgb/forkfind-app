@@ -108,7 +108,7 @@ Hosting       →  Netlify (free tier)
 No installation. No setup. No API key. Just open and use.
 
 ### Option 1 — Use the live app
-👉 **[https://forkfind.netlify.app/](https://forkfind.netlify.app/)** *(replace with your actual link)*
+👉 **[https://forkfind.netlify.app/](https://forkfind.netlify.app/)**
 
 ### Option 2 — Run locally
 
