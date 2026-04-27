@@ -7,8 +7,6 @@
 ## 💡 The Inspiration
 Dining out should be a highlight, not a logistical challenge. I built **ForkFind** to eliminate the ambiguity of choice by aligning immediate cravings with the city’s finest culinary destinations.
 
-**A Personal Note:**
-I am an 18-year-old developer, and this is my first original project. While I leveraged AI as a high-speed co-pilot for debugging and complex logic execution, the core concept, UI design, and project architecture were entirely driven by my own vision
 
 ### *Stop ordering in. Start going out.*
 
@@ -191,6 +189,9 @@ Contributions, issues, and feature requests are welcome!
 ---
 
 ## 👨‍💻 Author
+
+**A Personal Note:**
+I am an 18-year-old developer, and this is my first original project. While I leveraged AI as a high-speed co-pilot for debugging and complex logic execution, the core concept, UI design, and project architecture were entirely driven by my own vision
 
 **Made with ❤️ by [Kanika Sharma](https://github.com/kvertigo369-rgb)**
 
