@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="google-site-verification" content="E_wsxosDssToREJQTbfoUfx96vVc5SI1ASgfqd1HqP4" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>forkfind – Discover & Dine</title>
+    <link rel="manifest" href="manifest.json">
+
+  <!-- Leaflet.js (free map) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet"/>
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'DM Sans',sans-serif;background:#f5f4f0}
+    .app{display:flex;flex-direction:column;height:100vh}
+
+    /* TOP BAR */
+    .topbar{background:#fff;border-bottom:1px solid #eee;padding:12px 20px;display:flex;align-items:center;gap:14px;z-index:1000;flex-shrink:0}
+    .logo{display:flex;align-items:center;gap:9px}
+    .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#1D9E75,#0F6E56);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .logo-icon svg{width:20px;height:20px}
+    .logo-text{display:flex;flex-direction:column;line-height:1}
+    .logo-top{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:#111}
+    .logo-top span{color:#1D9E75}
+    .logo-sub{font-size:9px;font-weight:500;letter-spacing:1.5px;color:#aaa;text-transform:uppercase;margin-top:2px}
+    .search-box{flex:1;display:flex;align-items:center;gap:8px;background:#f5f4f0;border:1px solid #e5e5e5;border-radius:12px;padding:8px 14px}
+    .search-box input{border:none;background:transparent;font-size:14px;font-family:'DM Sans',sans-serif;color:#111;outline:none;width:100%}
+    .search-box input::placeholder{color:#bbb}
+    .loc-badge{display:flex;align-items:center;gap:5px;font-size:12px;color:#1D9E75;font-weight:500;background:#E1F5EE;padding:5px 10px;border-radius:20px;white-space:nowrap;cursor:pointer}
+    .loc-badge:hover{background:#c5edd9}
+
+    /* FILTERS */
+    .filters{background:#fff;border-bottom:1px solid #eee;padding:11px 20px;display:flex;flex-direction:column;gap:9px;flex-shrink:0;z-index:999}
+    .filter-row{display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none}
+    .filter-row::-webkit-scrollbar{display:none}
+    .filter-label{font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.8px;min-width:58px}
+    .chip{border:1px solid #e0e0e0;border-radius:20px;padding:5px 13px;font-size:13px;cursor:pointer;white-space:nowrap;background:#fff;color:#555;transition:all .15s;font-family:'DM Sans',sans-serif}
+    .chip:hover{border-color:#1D9E75;color:#1D9E75}
+    .chip.active{background:#1D9E75;border-color:#1D9E75;color:#fff}
+    .open-toggle{display:flex;align-items:center;gap:6px;font-size:13px;color:#666;cursor:pointer;margin-left:auto}
+    .toggle{width:32px;height:18px;background:#ddd;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0}
+    .toggle.on{background:#1D9E75}
+    .toggle::after{content:'';position:absolute;width:14px;height:14px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+    .toggle.on::after{left:16px}
+
+    /* BODY */
+    .body{display:flex;flex:1;overflow:hidden}
+
+    /* LIST */
+    .list-panel{width:330px;min-width:330px;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;background:#f5f4f0}
+    .results-header{font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:#aaa;padding:2px 0 4px}
+    .card{background:#fff;border:1px solid #eee;border-radius:14px;padding:14px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+    .card:hover{border-color:#1D9E75}
+    .card.selected{border-color:#1D9E75;box-shadow:0 0 0 1px #1D9E75}
+    .card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px}
+    .card-name{font-size:15px;font-weight:600;color:#111;letter-spacing:-.1px}
+    .budget-badge{font-size:11px;padding:3px 9px;border-radius:10px;font-weight:600;white-space:nowrap}
+    .budget-b{background:#E1F5EE;color:#0F6E56}
+    .budget-m{background:#FAEEDA;color:#854F0B}
+    .budget-f{background:#EEEDFE;color:#3C3489}
+    .card-address{font-size:12px;color:#aaa;margin-bottom:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .card-meta{display:flex;align-items:center;gap:8px;font-size:12px;color:#666;flex-wrap:wrap}
+    .stars{color:#EF9F27}
+    .mdot{width:3px;height:3px;background:#ccc;border-radius:50%;display:inline-block}
+    .vdot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:2px}
+    .vdot.veg{background:#1D9E75}
+    .vdot.nonveg{background:#D85A30}
+    .vdot.vegan{background:#639922}
+    .open-tag{color:#1D9E75;font-weight:600}
+    .closed-tag{color:#D85A30}
+    .empty-state{text-align:center;padding:40px 20px;color:#aaa;font-size:14px;line-height:1.6}
+    .empty-icon{font-size:36px;margin-bottom:10px}
+
+    /* MAP */
+    .map-panel{flex:1;position:relative;z-index:1}
+    #map{width:100%;height:100%}
+
+    /* INFO CARD */
+    .info-card{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:#fff;border:1px solid #eee;border-radius:16px;padding:16px 20px;min-width:270px;max-width:320px;box-shadow:0 4px 24px rgba(0,0,0,.12);z-index:1000;font-family:'DM Sans',sans-serif}
+    .info-name{font-size:16px;font-weight:600;color:#111;margin-bottom:4px}
+    .info-row{display:flex;align-items:center;gap:7px;font-size:13px;color:#666;margin-top:5px;flex-wrap:wrap}
+    .route-btn{margin-top:12px;width:100%;padding:10px;background:#1D9E75;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .15s}
+    .route-btn:hover{background:#0F6E56}
+    .close-btn{position:absolute;top:10px;right:14px;background:none;border:none;font-size:18px;color:#ccc;cursor:pointer;line-height:1}
+    .close-btn:hover{color:#888}
+
+    /* LOADING */
+    .loader{text-align:center;padding:30px 20px;color:#aaa;font-size:14px;line-height:1.8}
+    .loader b{color:#1D9E75;display:block;font-size:16px;margin-bottom:6px}
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M8 3v4a2 2 0 0 0 4 0V3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M10 9v12" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M16 3c0 0 2 1.5 2 5v9" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <span class="logo-top">fork<span>find</span></span>
+        <span class="logo-sub">Discover &amp; Dine</span>
+      </div>
+    </div>
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#bbb" stroke-width="1.5"/><path d="M11 11l3 3" stroke="#bbb" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <input type="text" id="searchInput" placeholder="Search restaurants, cuisines...">
+    </div>
+    <div class="loc-badge" id="locBadge" onclick="detectLocation()">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2C5.24 2 3 4.24 3 7c0 4 5 8 5 8s5-4 5-8c0-2.76-2.24-5-5-5z" fill="#1D9E75" opacity=".2"/><path d="M8 2C5.24 2 3 4.24 3 7c0 4 5 8 5 8s5-4 5-8c0-2.76-2.24-5-5-5z" stroke="#1D9E75" stroke-width="1.5"/><circle cx="8" cy="7" r="2" fill="#1D9E75"/></svg>
+      <span id="locText">Detecting...</span>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <div class="filter-row">
+      <span class="filter-label">Budget</span>
+      <span class="chip active" data-group="budget" data-val="all">All</span>
+      <span class="chip" data-group="budget" data-val="Budget">Budget</span>
+      <span class="chip" data-group="budget" data-val="Mid-range">Mid-range</span>
+      <span class="chip" data-group="budget" data-val="Fine dining">Fine dining</span>
+      <label class="open-toggle" id="openToggle">
+        <span>Open now</span>
+        <div class="toggle" id="toggleEl"></div>
+      </label>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">Diet</span>
+      <span class="chip active" data-group="diet" data-val="all">All</span>
+      <span class="chip" data-group="diet" data-val="Veg">🟢 Veg</span>
+      <span class="chip" data-group="diet" data-val="Non-Veg">🔴 Non-Veg</span>
+      <span class="chip" data-group="diet" data-val="Vegan">🌿 Vegan</span>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">Cuisine</span>
+      <span class="chip active" data-group="cuisine" data-val="all">All</span>
+      <span class="chip" data-group="cuisine" data-val="Indian">🍛 Indian</span>
+      <span class="chip" data-group="cuisine" data-val="Chinese">🥢 Chinese</span>
+      <span class="chip" data-group="cuisine" data-val="Italian">🍕 Italian</span>
+      <span class="chip" data-group="cuisine" data-val="Continental">🍽️ Continental</span>
+      <span class="chip" data-group="cuisine" data-val="Fast Food">🍔 Fast Food</span>
+      <span class="chip" data-group="cuisine" data-val="Cafe">☕ Cafe</span>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+    <div class="list-panel" id="listPanel">
+      <div class="loader"><b>Finding restaurants...</b>Please allow location access when prompted.</div>
+    </div>
+    <div class="map-panel">
+      <div id="map"></div>
+      <div class="info-card" id="infoCard" style="display:none">
+        <button class="close-btn" onclick="closeInfo()">✕</button>
+        <div class="info-name" id="infoName"></div>
+        <div class="info-row" id="infoRating"></div>
+        <div class="info-row" id="infoMeta"></div>
+        <div class="info-row" id="infoAddr"></div>
+        <button class="route-btn" id="routeBtn">🗺️ Get directions</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let map, userLatLng, allRestaurants=[], markers=[], selectedId=null;
+let userMarker=null;
+let filters={budget:"all",diet:"all",cuisine:"all",openNow:false,search:""};
+
+// ── CUISINE KEYWORDS ──
+const cuisineKeys={
+  "Indian":["indian","punjabi","mughal","biryani","dhaba","curry","tandoor","chaat","dosa","idli","haldiram","bikanervala"],
+  "Chinese":["chinese","wok","szechuan","manchurian","noodle","dimsum","dragon","panda","chopstick","beijing","hong kong"],
+  "Italian":["italian","pizza","pasta","trattoria","pizzeria","napoli","romano","gelato","risotto"],
+  "Continental":["continental","french","european","bistro","steakhouse","grill","brasserie"],
+  "Fast Food":["burger","kfc","mcdonald","subway","domino","pizza hut","wendy","fast food","fried chicken","roll","wrap","shawarma"],
+  "Cafe":["cafe","coffee","bakery","patisserie","brew","roast","espresso","tea","chai","boulangerie","dessert"]
+};
+function getCuisine(name){
+  const n=name.toLowerCase();
+  for(const [c,keys] of Object.entries(cuisineKeys)){
+    if(keys.some(k=>n.includes(k))) return c;
+  }
+  return "Indian";
+}
+
+// ── DIET GUESS ──
+function getDiet(name,tags){
+  const n=(name+" "+(tags||[]).join(" ")).toLowerCase();
+  if(n.includes("vegan")) return "Vegan";
+  if(n.includes(" veg")||n.includes("vegetarian")||n.includes("haldiram")||n.includes("satvic")) return "Veg";
+  return "Non-Veg";
+}
+
+// ── BUDGET from OSM amenity/tags ──
+function getBudget(tags){
+  const name=(tags&&tags.name||"").toLowerCase();
+  if(name.includes("haldiram")||name.includes("bikanervala")||name.includes("mcdonald")||name.includes("kfc")||name.includes("domino")) return "Budget";
+  if(name.includes("leela")||name.includes("oberoi")||name.includes("taj ")||name.includes("hilton")||name.includes("marriott")) return "Fine dining";
+  // random but consistent assignment so UI looks varied
+  const h=name.split("").reduce((a,c)=>a+c.charCodeAt(0),0);
+  const opts=["Budget","Budget","Mid-range","Mid-range","Mid-range","Fine dining"];
+  return opts[h%opts.length];
+}
+
+// ── OPEN HOURS (OSM doesn't always have this, so we simulate) ──
+function getOpen(tags){
+  if(!tags||!tags.opening_hours) return null;
+  // Very simple check — just return true for "24/7"
+  if(tags.opening_hours==="24/7") return true;
+  return null; // unknown
+}
+
+// ── STARS ──
+function starStr(r){
+  if(!r&&r!==0) return "No rating";
+  const f=Math.round(r);
+  return "★".repeat(f)+"☆".repeat(5-f)+" "+Number(r).toFixed(1);
+}
+
+function budgeClass(b){return b==="Budget"?"budget-b":b==="Mid-range"?"budget-m":"budget-f"}
+function dietClass(d){return d==="Veg"?"veg":d==="Non-Veg"?"nonveg":"vegan"}
+function dietEmoji(d){return d==="Veg"?"🟢":d==="Vegan"?"🌿":"🔴"}
+
+// ── DISTANCE (metres) ──
+function distM(a,b){
+  const R=6371000,dLat=(b.lat-a.lat)*Math.PI/180,dLng=(b.lng-a.lng)*Math.PI/180;
+  const x=Math.sin(dLat/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+  return Math.round(R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)));
+}
+function distStr(m){return m<1000?m+"m":(m/1000).toFixed(1)+"km"}
+
+// ── INIT MAP ──
+function initMap(lat,lng){
+  if(map) map.remove();
+  map=L.map("map",{zoomControl:true}).setView([lat,lng],15);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+    attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:19
+  }).addTo(map);
+
+  // User pin
+  const userIcon=L.divIcon({className:"",html:`<div style="width:16px;height:16px;background:#1D9E75;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>`,iconSize:[16,16],iconAnchor:[8,8]});
+  if(userMarker) userMarker.remove();
+  userMarker=L.marker([lat,lng],{icon:userIcon,zIndexOffset:1000}).addTo(map).bindPopup("<b>You are here</b>").openPopup();
+}
+
+// ── FETCH RESTAURANTS via Overpass API (free, no key) ──
+function fetchRestaurants(lat,lng){
+  document.getElementById("listPanel").innerHTML='<div class="loader"><b>Loading nearby restaurants...</b>Searching within 1.5 km of you...</div>';
+  const r=1500; // radius metres
+  const query=`[out:json][timeout:25];(node["amenity"="restaurant"](around:${r},${lat},${lng});node["amenity"="cafe"](around:${r},${lat},${lng});node["amenity"="fast_food"](around:${r},${lat},${lng}););out body;`;
+  const url="https://overpass-api.de/api/interpreter?data="+encodeURIComponent(query);
+
+  fetch(url)
+    .then(r=>r.json())
+    .then(data=>{
+      allRestaurants=data.elements.filter(e=>e.tags&&e.tags.name).map(e=>({
+        id:e.id,
+        name:e.tags.name,
+        address:e.tags["addr:street"]?`${e.tags["addr:housenumber"]||""} ${e.tags["addr:street"]}`.trim():(e.tags["addr:full"]||""),
+        lat:e.lat,lng:e.lon,
+        cuisine:getCuisine(e.tags.name+(e.tags.cuisine||"")),
+        diet:getDiet(e.tags.name,e.tags.cuisine?[e.tags.cuisine]:[]),
+        budget:getBudget(e.tags),
+        open:getOpen(e.tags),
+        tags:e.tags
+      }));
+
+      // Sort by distance
+      allRestaurants.sort((a,b)=>distM(userLatLng,a)-distM(userLatLng,b));
+
+      if(allRestaurants.length===0){
+        document.getElementById("listPanel").innerHTML='<div class="empty-state"><div class="empty-icon">🍽️</div>No restaurants found nearby.<br>Try moving to a different area.</div>';
+        return;
+      }
+      render();
+    })
+    .catch(()=>{
+      document.getElementById("listPanel").innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div>Could not load restaurants.<br>Check your internet connection and try again.</div>';
+    });
+}
+
+// ── DETECT LOCATION ──
+function detectLocation(){
+  document.getElementById("locText").textContent="Detecting...";
+  if(!navigator.geolocation){
+    document.getElementById("locText").textContent="Not supported";
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(pos=>{
+    userLatLng={lat:pos.coords.latitude,lng:pos.coords.longitude};
+    initMap(userLatLng.lat,userLatLng.lng);
+
+    // Reverse geocode via Nominatim (free)
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userLatLng.lat}&lon=${userLatLng.lng}&format=json`)
+      .then(r=>r.json())
+      .then(d=>{
+        const area=d.address.suburb||d.address.neighbourhood||d.address.city_district||d.address.city||"Your location";
+        document.getElementById("locText").textContent=area;
+      }).catch(()=>document.getElementById("locText").textContent="Your location");
+
+    fetchRestaurants(userLatLng.lat,userLatLng.lng);
+  },err=>{
+    document.getElementById("locText").textContent="Location denied";
+    document.getElementById("listPanel").innerHTML='<div class="empty-state"><div class="empty-icon">📍</div>Please allow location access<br>and click the location badge to retry.</div>';
+    // Default to New Delhi
+    userLatLng={lat:28.6139,lng:77.2090};
+    initMap(28.6139,77.2090);
+  });
+}
+
+// ── FILTER ──
+function filtered(){
+  return allRestaurants.filter(r=>{
+    if(filters.budget!=="all"&&r.budget!==filters.budget) return false;
+    if(filters.diet!=="all"&&r.diet!==filters.diet) return false;
+    if(filters.cuisine!=="all"&&r.cuisine!==filters.cuisine) return false;
+    if(filters.openNow&&r.open===false) return false;
+    if(filters.search){
+      const q=filters.search.toLowerCase();
+      if(!r.name.toLowerCase().includes(q)&&!r.cuisine.toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+// ── RENDER ──
+function render(){
+  const list=filtered();
+  const panel=document.getElementById("listPanel");
+  panel.innerHTML=`<div class="results-header">${list.length} restaurant${list.length!==1?"s":""} found nearby</div>`;
+
+  // Clear old markers
+  markers.forEach(m=>m.remove());
+  markers=[];
+
+  if(list.length===0){
+    panel.innerHTML+='<div class="empty-state"><div class="empty-icon">🔍</div>No restaurants match<br>your current filters.</div>';
+    return;
+  }
+
+  list.forEach(r=>{
+    const dist=userLatLng?distStr(distM(userLatLng,r)):"";
+    const isSel=selectedId===r.id;
+
+    // Card
+    const el=document.createElement("div");
+    el.className="card"+(isSel?" selected":"");
+    el.innerHTML=`
+      <div class="card-top">
+        <span class="card-name">${r.name}</span>
+        <span class="budget-badge ${budgeClass(r.budget)}">${r.budget}</span>
+      </div>
+      ${r.address?`<div class="card-address">📍 ${r.address}</div>`:""}
+      <div class="card-meta">
+        <span class="vdot ${dietClass(r.diet)}"></span>${r.diet}
+        <span class="mdot"></span>${r.cuisine}
+        ${dist?`<span class="mdot"></span>${dist}`:""}
+        ${r.open===true?`<span class="mdot"></span><span class="open-tag">Open</span>`:r.open===false?`<span class="mdot"></span><span class="closed-tag">Closed</span>`:""}
+      </div>`;
+    el.onclick=()=>selectR(r);
+    panel.appendChild(el);
+
+    // Map pin
+    const pinColor=isSel?"#0F6E56":"#1D9E75";
+    const icon=L.divIcon({
+      className:"",
+      html:`<div style="background:${pinColor};color:#fff;padding:4px 9px;border-radius:20px;font-size:11px;font-family:'DM Sans',sans-serif;font-weight:600;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.2);border:2px solid #fff">${r.name.length>14?r.name.slice(0,13)+"…":r.name}</div>`,
+      iconAnchor:[0,0]
+    });
+    const mk=L.marker([r.lat,r.lng],{icon}).addTo(map);
+    mk.on("click",()=>selectR(r));
+    markers.push(mk);
+  });
+}
+
+// ── SELECT ──
+function selectR(r){
+  selectedId=r.id;
+  const dist=userLatLng?distStr(distM(userLatLng,r)):"";
+
+  document.getElementById("infoName").textContent=r.name;
+  document.getElementById("infoRating").innerHTML=`<span style="color:#EF9F27">★★★★☆</span> <span style="color:#666">${r.cuisine} · ${r.diet}</span>`;
+  document.getElementById("infoMeta").innerHTML=`<span class="budget-badge ${budgeClass(r.budget)}">${r.budget}</span> ${dist?`· 📍 ${dist} away`:""}`;
+  document.getElementById("infoAddr").innerHTML=r.address?`🏠 ${r.address}`:``;
+  document.getElementById("infoCard").style.display="block";
+
+  document.getElementById("routeBtn").onclick=()=>{
+    if(userLatLng){
+      window.open(`https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${userLatLng.lat},${userLatLng.lng};${r.lat},${r.lng}`,"_blank");
+    } else {
+      window.open(`https://www.openstreetmap.org/?mlat=${r.lat}&mlon=${r.lng}#map=17/${r.lat}/${r.lng}`,"_blank");
+    }
+  };
+
+  map.panTo([r.lat,r.lng]);
+  render();
+}
+
+function closeInfo(){
+  selectedId=null;
+  document.getElementById("infoCard").style.display="none";
+  render();
+}
+
+// ── CHIPS ──
+document.querySelectorAll(".chip").forEach(c=>{
+  c.onclick=()=>{
+    const g=c.dataset.group,v=c.dataset.val;
+    document.querySelectorAll(`.chip[data-group="${g}"]`).forEach(x=>x.classList.remove("active"));
+    c.classList.add("active");
+    filters[g]=v;
+    render();
+  };
+});
+
+document.getElementById("openToggle").onclick=()=>{
+  filters.openNow=!filters.openNow;
+  document.getElementById("toggleEl").classList.toggle("on",filters.openNow);
+  render();
+};
+
+document.getElementById("searchInput").oninput=e=>{
+  filters.search=e.target.value;
+  render();
+};
+
+// ── START ──
+detectLocation();
+</script>
+</body>
+</html>
