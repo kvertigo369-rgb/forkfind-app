@@ -95,7 +95,7 @@ Hosting       →  Netlify (free tier)
 <img width="1906" height="895" alt="P2" src="https://github.com/user-attachments/assets/8afa3555-3778-437d-b946-20a6c4777bf3" />
 <img width="1912" height="866" alt="P1" src="https://github.com/user-attachments/assets/d25812cf-8782-487a-aff5-e377c4f024ee" />
 
-> *(Add your screenshots here once deployed)*
+> 
 "C:\Users\User\Videos\forkfind (SR1).mp4"
 
 
