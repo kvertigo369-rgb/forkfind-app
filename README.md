@@ -96,7 +96,7 @@ Hosting       →  Netlify (free tier)
 <img width="1912" height="866" alt="P1" src="https://github.com/user-attachments/assets/d25812cf-8782-487a-aff5-e377c4f024ee" />
 
 > 
-"C:\Users\User\Videos\forkfind (SR1).mp4"
+"User\Videos\forkfind (SR1).mp4"
 
 
 
@@ -198,6 +198,25 @@ I am an 18-year-old developer, and this is my first original project. While I le
 > *"I built forkfind because I believe the best meals aren't the ones delivered to your door — they're the ones shared around a table with the people you love."*
 
 ---
+## What I learned building this
+
+This was my first original project and it taught me more than any tutorial ever could.
+
+**Async API calls were my biggest challenge.** The Overpass API sometimes takes 2–3 
+seconds to respond, and I had to learn how to handle loading states so the UI didn't 
+freeze. I spent two days on this one problem.
+
+**Geolocation is not instant.** I assumed `navigator.geolocation` would return a 
+location immediately. It doesn't — and on some devices it fails silently. I had to 
+write proper error handling and fallback messages.
+
+**Map rendering has its own logic.** Leaflet.js was new to me. Getting map pins to 
+update dynamically as filters changed without re-rendering the whole map took a lot 
+of trial and error.
+
+**README writing is a skill.** I spent almost as long on the README as on the code 
+itself. Explaining something clearly to a stranger is harder than building it.
+
 
 ## 📄 License
 
