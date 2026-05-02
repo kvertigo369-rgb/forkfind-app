@@ -111,7 +111,7 @@ No installation. No setup. No API key. Just open and use.
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/kvertigo369-rgb/forkfind.git
+git clone https://github.com/kvertigo369-rgb/forkfind-app.git
 
 # 2. Open the folder
 cd forkfind
