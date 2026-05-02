@@ -107,20 +107,6 @@ No installation. No setup. No API key. Just open and use.
 ### Option 1 — Use the live app
 👉 **[https://forkfind.netlify.app/](https://forkfind.netlify.app/)**
 
-### Option 2 — Run locally
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/kvertigo369-rgb/forkfind-app.git
-
-# 2. Open the folder
-cd forkfind
-
-# 3. Open index.html in your browser
-open index.html
-```
-
-That's it. Seriously. No `npm install`. No config files. No environment variables.
 
 ---
 
