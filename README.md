@@ -98,13 +98,6 @@ Hosting       →  Netlify (free tier)
 > 
 "User\Videos\forkfind (SR1).mp4"
 
-
-
-
-| Filter View | Map View | Directions |
-|---|---|---|
-| ![Filter](https://placehold.co/250x180/f5f4f0/1D9E75?text=Filters) | ![Map](https://placehold.co/250x180/e8e0d5/0F6E56?text=Map+View) | ![Directions](https://placehold.co/250x180/E1F5EE/1D9E75?text=Directions) |
-
 ---
 
 ## 🏁 Getting Started
