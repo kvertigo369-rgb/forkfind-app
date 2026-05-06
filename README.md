@@ -105,8 +105,7 @@ Hosting       →  Netlify (free tier)
 No installation. No setup. No API key. Just open and use.
 
 ### Option 1 — Use the live app
-👉 **[https://forkfind.netlify.app/](https://forkfind.netlify.app/)**
-
+👉  https://kvertigo369-rgb.github.io/forkfind-app/
 
 ---
 
