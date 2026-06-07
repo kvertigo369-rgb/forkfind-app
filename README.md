@@ -30,7 +30,7 @@ Dining out should be a highlight, not a logistical challenge. I built **ForkFind
 
 ---
 
-## 🚀 The Problem forkfind Solves
+## 🚀 The Problem forkfind Solves  
 
 Ever been in this situation?
 
